@@ -1,9 +1,24 @@
 ﻿#pragma once
+#include <map>
 #include <string>
+#include <vector>
 
-class Compressor
+namespace Compressor
 {
-public:
-    std::string CompressData(std::string& data);
-    std::string DecompressData(std::string& data);
-};
+    struct CompressorOutput
+    {
+        std::map<std::string, std::string> compressionTable;
+        uint64_t initialBitSize;
+        std::vector<uint8_t> compressedTextBytes;
+
+        CompressorOutput(std::map<std::string, std::string> compressionTable, const uint64_t initialBitSize, std::vector<uint8_t> compressedTextBytes)
+            : compressionTable(std::move(compressionTable)),
+              initialBitSize(initialBitSize),
+              compressedTextBytes(std::move(compressedTextBytes))
+        {
+        }
+    };
+
+    CompressorOutput CompressData(const std::string& text);
+    std::string DecompressData(CompressorOutput& data);
+}

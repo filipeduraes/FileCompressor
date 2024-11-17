@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <string>
 
+#include "Compressor.h"
+
 class FileHandler
 {
 private:
@@ -9,6 +11,9 @@ private:
 public:
     FileHandler(std::string filePath);
     
-    void SaveFile(std::string data);
-    std::string LoadFile();
+    void SaveTextFile(const std::string& data);
+    void SaveBinaryFile(const Compressor::CompressorOutput& data);
+    
+    std::string LoadTextFile();
+    Compressor::CompressorOutput LoadBinaryFile();
 };
