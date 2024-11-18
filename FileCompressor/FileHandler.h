@@ -16,4 +16,7 @@ public:
     
     std::string LoadTextFile();
     Compressor::CompressorOutput LoadBinaryFile();
+
+private:
+    std::string GetOutputPath(bool isCompressed) const;
 };
