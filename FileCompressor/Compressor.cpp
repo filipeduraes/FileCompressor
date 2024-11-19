@@ -3,10 +3,10 @@
 
 #include "Compressor.h"
 
-#include "Node.h"
+#include "HuffmanNode.h"
 #include "StringUtills.h"
 
-std::vector<Compressor::INode*> GetInitialWordCounts(const std::vector<std::string>& words)
+std::vector<Compressor::IHuffmanNode*> GetInitialWordCounts(const std::vector<std::string>& words)
 {
     std::map<std::string, int> wordCounts;
     
@@ -20,7 +20,7 @@ std::vector<Compressor::INode*> GetInitialWordCounts(const std::vector<std::stri
         wordCounts[word]++;
     }
 
-    std::vector<Compressor::INode*> result;
+    std::vector<Compressor::IHuffmanNode*> result;
     result.reserve(wordCounts.size());
     
     for(const std::pair<const std::string, int>& wordCount : wordCounts)
@@ -31,7 +31,7 @@ std::vector<Compressor::INode*> GetInitialWordCounts(const std::vector<std::stri
     return result;
 }
 
-std::tuple<uint64_t, uint64_t> GetTwoSmallerIndexes(const std::vector<Compressor::INode*>& nodes)
+std::tuple<uint64_t, uint64_t> GetTwoSmallerIndexes(const std::vector<Compressor::IHuffmanNode*>& nodes)
 {
     uint64_t smallestIndex = 0;
     uint64_t secondSmallestIndex = 0;
@@ -52,7 +52,7 @@ std::tuple<uint64_t, uint64_t> GetTwoSmallerIndexes(const std::vector<Compressor
     return {smallestIndex, secondSmallestIndex};
 }
 
-Compressor::INode* CreateNodeTree(std::vector<Compressor::INode*>& nodeTree)
+Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>& nodeTree)
 {
     while(nodeTree.size() > 1)
     {
@@ -61,21 +61,21 @@ Compressor::INode* CreateNodeTree(std::vector<Compressor::INode*>& nodeTree)
         const uint64_t smallerIndex = std::get<0>(twoSmallerIndexes);
         const uint64_t secondSmallerIndex = std::get<1>(twoSmallerIndexes);
 
-        Compressor::INode* smallerNode = nodeTree[smallerIndex];
-        Compressor::INode* secondSmallerNode = nodeTree[secondSmallerIndex];
+        Compressor::IHuffmanNode* smallerNode = nodeTree[smallerIndex];
+        Compressor::IHuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
         
         nodeTree.erase(nodeTree.begin() + static_cast<size_t>(smallerIndex));
         const uint64_t secondSmallerIndexAfterRemoval = secondSmallerIndex < smallerIndex ? secondSmallerIndex : secondSmallerIndex - 1;
         nodeTree.erase(nodeTree.begin() + static_cast<size_t>(secondSmallerIndexAfterRemoval));
 
-        Compressor::INode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
+        Compressor::IHuffmanNode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
         nodeTree.push_back(combinedNode);
     }
 
     return nodeTree[0];
 }
 
-void BuildEncodingTableRecursive(Compressor::INode* currentNode, std::map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
+void BuildEncodingTableRecursive(Compressor::IHuffmanNode* currentNode, std::map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
 {
     if(const Compressor::CompositeNode* currentComposite = dynamic_cast<Compressor::CompositeNode*>(currentNode))
     {
@@ -123,17 +123,25 @@ std::vector<uint8_t> ConvertEncodedTextToBytes(const std::string& encodedText)
 
 Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 {
-    const std::vector<std::string> words = StringUtils::Split(text);
+    if(!text.empty())
+    {
+        const std::vector<std::string> words = StringUtils::Split(text);
 
-    std::vector<INode*> nodeTree = GetInitialWordCounts(words);
-    INode* root = CreateNodeTree(nodeTree);
+        if (!words.empty())
+        {
+            std::vector<IHuffmanNode*> nodeTree = GetInitialWordCounts(words);
+            IHuffmanNode* root = CreateNodeTree(nodeTree);
 
-    std::map<std::string, std::string> compressionTable;
-    BuildEncodingTableRecursive(root, compressionTable);
-    const std::string result = EncodeText(words, compressionTable);
-    const std::vector<uint8_t> textBytes = ConvertEncodedTextToBytes(result);
+            std::map<std::string, std::string> compressionTable;
+            BuildEncodingTableRecursive(root, compressionTable);
+            const std::string result = EncodeText(words, compressionTable);
+            const std::vector<uint8_t> textBytes = ConvertEncodedTextToBytes(result);
 
-    return { compressionTable, result.size(), textBytes };
+            return {compressionTable, result.size(), textBytes};
+        }
+    }
+    
+    return {};
 }
 
 std::string Compressor::DecompressData(CompressorOutput& data)

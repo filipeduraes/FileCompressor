@@ -14,11 +14,11 @@ int main()
         std::cin >> choice;
     }
 
-    std::cout << "Insira o caminho do arquivo: ";
+    std::cout << "Insira o caminho do arquivo: \n";
     std::string filePath;
-    std::getline(std::cin, filePath);
-    
-    FileHandler fileHandler = filePath;
+    std::getline(std::cin >> std::ws, filePath);
+
+    FileHandler fileHandler(filePath);
     
     switch(choice)
     {
@@ -26,6 +26,11 @@ int main()
         {
             const std::string loadedData = fileHandler.LoadTextFile();
             const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
+            if(compressorOutput.initialBitSize == 0)
+            {
+                std::cerr << "Compressao falhou!";
+                return -1;
+            }
             fileHandler.SaveBinaryFile(compressorOutput);
             break;
         }

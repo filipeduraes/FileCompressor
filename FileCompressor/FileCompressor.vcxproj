@@ -130,14 +130,17 @@
     <ClCompile Include="Compressor.cpp" />
     <ClCompile Include="FileCompressor.cpp" />
     <ClCompile Include="FileHandler.cpp" />
-    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="HuffmanNode.cpp" />
     <ClCompile Include="StringUtills.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compressor.h" />
     <ClInclude Include="FileHandler.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="HuffmanNode.h" />
     <ClInclude Include="StringUtills.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

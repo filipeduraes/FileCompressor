@@ -1,4 +1,4 @@
-﻿#include "Node.h"
+﻿#include "HuffmanNode.h"
 
 Compressor::LeafNode::LeafNode(const int wordCount, std::string word)
     : word(std::move(word)), wordCount(wordCount)
@@ -11,7 +11,7 @@ int Compressor::LeafNode::GetCount()
 }
 
 
-Compressor::CompositeNode::CompositeNode(INode* left, INode* right)
+Compressor::CompositeNode::CompositeNode(IHuffmanNode* left, IHuffmanNode* right)
     : leftNode(left), rightNode(right)
 {
     count = leftNode->GetCount() + rightNode->GetCount();

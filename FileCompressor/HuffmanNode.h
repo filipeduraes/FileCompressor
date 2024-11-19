@@ -3,14 +3,14 @@
 
 namespace Compressor
 {
-    class INode
+    class IHuffmanNode
     {
     public:
         virtual int GetCount() = 0;
-        virtual ~INode() = default;
+        virtual ~IHuffmanNode() = default;
     };
 
-    class LeafNode final : public INode
+    class LeafNode final : public IHuffmanNode
     {
     public:
         std::string word;
@@ -20,14 +20,14 @@ namespace Compressor
         int GetCount() override;
     };
 
-    class CompositeNode final : public INode
+    class CompositeNode final : public IHuffmanNode
     {
     public:
-        INode* leftNode;
-        INode* rightNode;
+        IHuffmanNode* leftNode;
+        IHuffmanNode* rightNode;
         int count;
 
-        CompositeNode(INode* left, INode* right);
+        CompositeNode(IHuffmanNode* left, IHuffmanNode* right);
         ~CompositeNode() override;
 
         int GetCount() override;
