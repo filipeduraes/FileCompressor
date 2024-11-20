@@ -1,7 +1,7 @@
-﻿#include "FileHandler.h"
-
-#include <fstream>
+﻿#include <fstream>
 #include <sstream>
+
+#include "FileHandler.h"
 
 FileHandler::FileHandler(std::string filePath)
     : path(std::move(filePath))

@@ -1,8 +1,6 @@
-﻿#include <cstdint>
-#include <stack>
+﻿#include <stack>
 
 #include "Compressor.h"
-
 #include "HuffmanNode.h"
 #include "StringUtills.h"
 

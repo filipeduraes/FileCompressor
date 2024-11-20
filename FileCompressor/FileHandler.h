@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include <cstdint>
 #include <string>
+
 #include "Compressor.h"
 
 class FileHandler
