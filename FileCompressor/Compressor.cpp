@@ -1,5 +1,5 @@
 ﻿#include <stack>
-
+#include <bitset>
 #include "Compressor.h"
 #include "HuffmanNode.h"
 #include "StringUtills.h"
@@ -144,5 +144,36 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
 std::string Compressor::DecompressData(CompressorOutput& data)
 {
-    return "";
+   std::string decompressedText;
+    std::string bitString;
+    //Conversão dos bytes comprimidos para uma string de bits
+    for (const auto& byte : data.compressedTextBytes)
+    {
+        std::bitset<8> bits(byte);
+        bitString += bits.to_string();
+    }
+    // Remover os bits extras com base no tamanho
+    bitString = bitString.substr(0, data.initialBitSize);
+    // Descomprimir os dados utilizando a tabela de compressão
+    std::string currentBits;
+    for (size_t i = 0; i < bitString.size(); ++i)
+    {
+        currentBits += bitString[i]; // Adicionar o bit ao bloco de bits
+
+        // Ve se o bloco de bits existe na tabela de compressão
+        if (data.compressionTable.find(currentBits) != data.compressionTable.end())
+        {
+            // Se encontrar, adicionar a palavra ao texto descomprimido
+            decompressedText += data.compressionTable.at(currentBits) + " ";
+
+            // Resetar o bloco de bits
+            currentBits.clear();
+        }
+    }
+    // Remover o último espaço em branco (se adicionado)
+    if (!decompressedText.empty() && decompressedText.back() == ' ')
+    {
+        decompressedText.pop_back();
+    }
+    return decompressedText; 
 }
