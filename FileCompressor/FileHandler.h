@@ -18,7 +18,7 @@ public:
     Compressor::CompressorOutput LoadBinaryFile() const;
 
 private:
-    void ReadAllLinesFromFile(std::vector<std::string> lines) const;
+    void ReadAllLinesFromFile(std::vector<std::string>& lines) const;
     static void InterpretCompressionTable(std::vector<std::string> lines, std::map<std::string, std::string>& compressionTable);
     static uint64_t InterpretInitialBitSize(const std::string& line);
     static void InterpretCompressedBytes(const std::string& compressedText, std::vector<uint8_t>& compressedBytes);

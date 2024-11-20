@@ -36,7 +36,7 @@ std::string FileHandler::LoadTextFile() const
 
 Compressor::CompressorOutput FileHandler::LoadBinaryFile() const
 {
-    const std::vector<std::string> lines;
+    std::vector<std::string> lines;
     ReadAllLinesFromFile(lines);
 
     std::map<std::string, std::string> compressionTable;
@@ -51,7 +51,7 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile() const
 }
 
 
-void FileHandler::ReadAllLinesFromFile(std::vector<std::string> lines) const
+void FileHandler::ReadAllLinesFromFile(std::vector<std::string>& lines) const
 {
     std::ifstream stream(path);
     std::string line;
