@@ -73,12 +73,12 @@ Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>&
     return nodeTree[0];
 }
 
-void BuildEncodingTableRecursive(Compressor::IHuffmanNode* currentNode, std::map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
+void BuildCompressionTableRecursive(Compressor::IHuffmanNode* currentNode, std::map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
 {
     if(const Compressor::CompositeNode* currentComposite = dynamic_cast<Compressor::CompositeNode*>(currentNode))
     {
-        BuildEncodingTableRecursive(currentComposite->leftNode, binaryWords, currentCode + '0');
-        BuildEncodingTableRecursive(currentComposite->rightNode, binaryWords, currentCode + '1');
+        BuildCompressionTableRecursive(currentComposite->leftNode, binaryWords, currentCode + '0');
+        BuildCompressionTableRecursive(currentComposite->rightNode, binaryWords, currentCode + '1');
     }
     else if(const Compressor::LeafNode* currentLeaf = dynamic_cast<Compressor::LeafNode*>(currentNode))
     {
@@ -119,6 +119,14 @@ std::vector<uint8_t> ConvertEncodedTextToBytes(const std::string& encodedText)
     return result;
 }
 
+void ReverseCompressionTable(const std::map<std::string, std::string>& compressionTable, std::map<std::string, std::string>& reversedCompressionTable)
+{
+    for(const std::pair<std::string, std::string> pair : compressionTable)
+    {
+        reversedCompressionTable[pair.second] = pair.first;
+    }
+}
+
 Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 {
     if(!text.empty())
@@ -131,11 +139,15 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
             IHuffmanNode* root = CreateNodeTree(nodeTree);
 
             std::map<std::string, std::string> compressionTable;
-            BuildEncodingTableRecursive(root, compressionTable);
+            BuildCompressionTableRecursive(root, compressionTable);
             const std::string result = EncodeText(words, compressionTable);
             const std::vector<uint8_t> textBytes = ConvertEncodedTextToBytes(result);
-
-            return {compressionTable, result.size(), textBytes};
+            
+            std::map<std::string, std::string> reversedCompressionTable;
+            ReverseCompressionTable(compressionTable, reversedCompressionTable);
+            compressionTable.clear();
+            
+            return {reversedCompressionTable, result.size(), textBytes};
         }
     }
     
@@ -144,7 +156,7 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
 std::string Compressor::DecompressData(CompressorOutput& data)
 {
-   std::string decompressedText;
+    std::string decompressedText;
     std::string bitString;
     //Conversão dos bytes comprimidos para uma string de bits
     for (const auto& byte : data.compressedTextBytes)
@@ -152,8 +164,10 @@ std::string Compressor::DecompressData(CompressorOutput& data)
         std::bitset<8> bits(byte);
         bitString += bits.to_string();
     }
+
     // Remover os bits extras com base no tamanho
     bitString = bitString.substr(0, data.initialBitSize);
+    
     // Descomprimir os dados utilizando a tabela de compressão
     std::string currentBits;
     for (size_t i = 0; i < bitString.size(); ++i)
@@ -170,10 +184,12 @@ std::string Compressor::DecompressData(CompressorOutput& data)
             currentBits.clear();
         }
     }
+    
     // Remover o último espaço em branco (se adicionado)
     if (!decompressedText.empty() && decompressedText.back() == ' ')
     {
         decompressedText.pop_back();
     }
+    
     return decompressedText; 
 }
