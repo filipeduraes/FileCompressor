@@ -18,7 +18,7 @@ void FileHandler::SaveBinaryFile(const Compressor::CompressorOutput& data)
     std::string outputPath = GetOutputPath(true);
 }
 
-std::string FileHandler::LoadTextFile()
+std::string FileHandler::LoadTextFile() const
 {
     std::ifstream stream (path);
     std::string line;
@@ -26,7 +26,7 @@ std::string FileHandler::LoadTextFile()
 
     while (std::getline(stream,line))
     {
-        result += line;    
+        result += line;
     }
 
     stream.close();
@@ -34,36 +34,61 @@ std::string FileHandler::LoadTextFile()
     return result;
 }
 
-Compressor::CompressorOutput FileHandler::LoadBinaryFile()
+Compressor::CompressorOutput FileHandler::LoadBinaryFile() const
+{
+    const std::vector<std::string> lines;
+    ReadAllLinesFromFile(lines);
+
+    std::map<std::string, std::string> compressionTable;
+    InterpretCompressionTable(lines, compressionTable);
+
+    uint64_t initialBitSize = InterpretInitialBitSize(lines[lines.size() - 2]);
+
+    std::vector<uint8_t> compressedBytes;
+    InterpretCompressedBytes(lines[lines.size() - 1], compressedBytes);
+    
+    return {compressionTable, initialBitSize, compressedBytes};
+}
+
+
+void FileHandler::ReadAllLinesFromFile(std::vector<std::string> lines) const
 {
     std::ifstream stream(path);
     std::string line;
-    std::vector<std::string> lines;
 
-    while (std::getline(stream,line ))
+    while (std::getline(stream, line))
     {
         lines.push_back(line);
     }
 
-    std::map<std::string, std::string> compressionTable;
-    
+    stream.close();
+}
+
+void FileHandler::InterpretCompressionTable(std::vector<std::string> lines, std::map<std::string, std::string>& compressionTable)
+{
     for (uint64_t i = 0; i < lines.size() - 2; i++)
     {
-        line = lines[i];
-        uint64_t separatorIndex = line.find_last_of(':');
+        std::string& line = lines[i];
+        const uint64_t separatorIndex = line.find_last_of(':');
     
         std::string key = line.substr(0,separatorIndex);
-        std::string valor = line.substr(separatorIndex + 1, line.size() - separatorIndex);
+        const std::string value = line.substr(separatorIndex + 1, line.size() - separatorIndex);
     
-        compressionTable[key] = valor;
+        compressionTable[key] = value;
     }
-    
-    uint64_t initialBitSize = 0;
-    std::stringstream sizeStream(lines[lines.size() - 2]);
-    sizeStream.read(reinterpret_cast<char*>(&initialBitSize), sizeof(initialBitSize));
+}
 
-    std::vector<uint8_t> compressedBytes;
-    std::stringstream compressedStream(lines[lines.size() - 1]);
+uint64_t FileHandler::InterpretInitialBitSize(const std::string& line)
+{
+    uint64_t initialBitSize;
+    std::stringstream sizeStream(line);
+    sizeStream.read(reinterpret_cast<char*>(&initialBitSize), sizeof(initialBitSize));
+    return initialBitSize;
+}
+
+void FileHandler::InterpretCompressedBytes(const std::string& compressedText, std::vector<uint8_t>& compressedBytes)
+{
+    std::stringstream compressedStream(compressedText);
 
     while(!compressedStream.eof())
     {
@@ -71,10 +96,6 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile()
         compressedStream.read(reinterpret_cast<char*>(&byte), sizeof(byte));
         compressedBytes.push_back(byte);
     }
-    
-    stream.close();
-
-    return {compressionTable, initialBitSize, compressedBytes};
 }
 
 std::string FileHandler::GetOutputPath(const bool isCompressed) const

@@ -139,9 +139,6 @@
     <ClInclude Include="HuffmanNode.h" />
     <ClInclude Include="StringUtills.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Test.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
