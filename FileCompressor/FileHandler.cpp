@@ -1,5 +1,8 @@
 ﻿#include "FileHandler.h"
 
+#include <fstream>
+#include <sstream>
+
 FileHandler::FileHandler(std::string filePath)
     : path(std::move(filePath))
 {
@@ -22,11 +25,11 @@ std::string FileHandler::LoadTextFile()
     std::string result;
 
     while (std::getline(stream,line))
-        {
-            result+= line;    
-        }
+    {
+        result += line;    
+    }
 
-        stream.close();
+    stream.close();
 
     return result;
 }
@@ -44,7 +47,7 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile()
 
     std::map<std::string, std::string> compressionTable;
     
-    for (int i = 0; i < lines.size() - 2; i++)
+    for (uint64_t i = 0; i < lines.size() - 2; i++)
     {
         line = lines[i];
         uint64_t separatorIndex = line.find_last_of(':');
@@ -53,26 +56,26 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile()
         std::string valor = line.substr(separatorIndex + 1, line.size() - separatorIndex);
     
         compressionTable[key] = valor;
-
     }
-        uint64_t initialBitSize = 0;
-        std::stringstream sizeStream (lines[lines.size()-2]);
-        sizeStream.read(reinterpret_cast<char*>(&initialBitSize), sizeof(initialBitSize));
     
-        std::vector<uint8_t> compressedBytes;
-        std::stringstream compressedStream (lines[lines.size()-1]);
+    uint64_t initialBitSize = 0;
+    std::stringstream sizeStream(lines[lines.size() - 2]);
+    sizeStream.read(reinterpret_cast<char*>(&initialBitSize), sizeof(initialBitSize));
 
-        while(!compressedStream.eof())
-        {
-            uint8_t byte;
-            compressedStream.read(reinterpret_cast<char*>(&byte), sizeof(byte));
-            compressedBytes.push_back(byte);
-        }
-        
-        stream.close();
+    std::vector<uint8_t> compressedBytes;
+    std::stringstream compressedStream(lines[lines.size() - 1]);
 
-        return {compressionTable, initialBitSize, compressedBytes};
+    while(!compressedStream.eof())
+    {
+        uint8_t byte;
+        compressedStream.read(reinterpret_cast<char*>(&byte), sizeof(byte));
+        compressedBytes.push_back(byte);
     }
+    
+    stream.close();
+
+    return {compressionTable, initialBitSize, compressedBytes};
+}
 
 std::string FileHandler::GetOutputPath(const bool isCompressed) const
 {
