@@ -5,7 +5,7 @@
 #include "Compressor.h"
 #include "FileHandler.h"
 
-int main()
+int GetUserInput(std::string& filePath)
 {
     std::cout << "Deseja comprimir (0) ou descomprimir (1) o arquivo? ";
     int choice = -1;
@@ -16,40 +16,55 @@ int main()
     }
 
     std::cout << "Insira o caminho do arquivo: \n";
-    std::string filePath;
     std::getline(std::cin >> std::ws, filePath);
+    return choice;
+}
 
-    FileHandler fileHandler(filePath);
+int CompressFile(FileHandler fileHandler)
+{
+    const std::string loadedData = fileHandler.LoadTextFile();
+    const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
+
+    if(compressorOutput.initialBitSize == 0)
+    {
+        std::cerr << "Falha na compressao.";
+        return EXIT_FAILURE;
+    }
+                
+    fileHandler.SaveBinaryFile(compressorOutput);
+    return EXIT_SUCCESS;
+}
+
+int DecompressFile(FileHandler fileHandler)
+{
+    Compressor::CompressorOutput loadedData = fileHandler.LoadBinaryFile();
+    const std::string decompressedData = DecompressData(loadedData);
+
+    if(decompressedData.empty())
+    {
+        std::cerr << "Falha na descompressao.";
+        return EXIT_FAILURE;
+    }
+                
+    fileHandler.SaveTextFile(decompressedData);
+    return EXIT_SUCCESS;
+}
+
+int main()
+{
+    std::string filePath;
+    const int choice = GetUserInput(filePath);
+    const FileHandler fileHandler(filePath);
     
     switch(choice)
     {
         case 0:
         {
-            const std::string loadedData = fileHandler.LoadTextFile();
-            const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
-
-            if(compressorOutput.initialBitSize == 0)
-            {
-                std::cerr << "Falha na compressao.";
-                return EXIT_FAILURE;
-            }
-                
-            fileHandler.SaveBinaryFile(compressorOutput);
-            break;
+            return CompressFile(fileHandler);
         }
         case 1:
         {
-            Compressor::CompressorOutput loadedData = fileHandler.LoadBinaryFile();
-            const std::string decompressedData = DecompressData(loadedData);
-
-            if(decompressedData.empty())
-            {
-                std::cerr << "Falha na descompressao.";
-                return EXIT_FAILURE;
-            }
-                
-            fileHandler.SaveTextFile(decompressedData);
-            break;
+            return DecompressFile(fileHandler);
         }
         default:
         {
@@ -57,6 +72,4 @@ int main()
             return EXIT_FAILURE;
         }
     }
-    
-    return EXIT_SUCCESS;
 }

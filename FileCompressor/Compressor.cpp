@@ -6,6 +6,7 @@
 #include "StringUtills.h"
 #include "Compressor.h"
 
+// Private Global functions
 std::vector<Compressor::IHuffmanNode*> GetInitialWordCounts(const std::vector<std::string>& words)
 {
     std::map<std::string, int> wordCounts;
@@ -129,6 +130,40 @@ void ReverseCompressionTable(const std::map<std::string, std::string>& compressi
     }
 }
 
+std::string ConvertCompressedBytesToBitString(const Compressor::CompressorOutput& data)
+{
+    std::string bitString;
+
+    for (const uint8_t& byte : data.compressedTextBytes)
+    {
+        std::bitset<8> bits(byte);
+        bitString += bits.to_string();
+    }
+    
+    return bitString;
+}
+
+std::string DecodeBitStringWithCompressionTable(Compressor::CompressorOutput& data, const std::string& bitString)
+{
+    std::string currentBits;
+    std::string decompressedText;
+    
+    for (const char& bit : bitString)
+    {
+        currentBits += bit;
+
+        if (data.compressionTable.find(currentBits) != data.compressionTable.end())
+        {
+            decompressedText += data.compressionTable.at(currentBits) + " ";
+            currentBits.clear();
+        }
+    }
+
+    return decompressedText;
+}
+
+
+// Public API functions
 Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 {
     if(!text.empty())
@@ -162,34 +197,12 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
 std::string Compressor::DecompressData(CompressorOutput& data)
 {
-    std::string decompressedText;
-    std::string bitString;
-    //Conversão dos bytes comprimidos para uma string de bits
-    for (const auto& byte : data.compressedTextBytes)
-    {
-        std::bitset<8> bits(byte);
-        bitString += bits.to_string();
-    }
+    std::string bitString = ConvertCompressedBytesToBitString(data);
 
     // Remover os bits extras com base no tamanho
     bitString = bitString.substr(0, data.initialBitSize);
     
-    // Descomprimir os dados utilizando a tabela de compressão
-    std::string currentBits;
-    for (size_t i = 0; i < bitString.size(); ++i)
-    {
-        currentBits += bitString[i]; // Adicionar o bit ao bloco de bits
-
-        // Ve se o bloco de bits existe na tabela de compressão
-        if (data.compressionTable.find(currentBits) != data.compressionTable.end())
-        {
-            // Se encontrar, adicionar a palavra ao texto descomprimido
-            decompressedText += data.compressionTable.at(currentBits) + " ";
-
-            // Resetar o bloco de bits
-            currentBits.clear();
-        }
-    }
+    std::string decompressedText = DecodeBitStringWithCompressionTable(data, bitString);
     
     // Remover o último espaço em branco (se adicionado)
     if (!decompressedText.empty() && decompressedText.back() == ' ')
