@@ -1,8 +1,10 @@
 ﻿#include <stack>
 #include <bitset>
-#include "Compressor.h"
+#include <iostream>
+
 #include "HuffmanNode.h"
 #include "StringUtills.h"
+#include "Compressor.h"
 
 std::vector<Compressor::IHuffmanNode*> GetInitialWordCounts(const std::vector<std::string>& words)
 {
@@ -62,9 +64,9 @@ Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>&
         Compressor::IHuffmanNode* smallerNode = nodeTree[smallerIndex];
         Compressor::IHuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
         
-        nodeTree.erase(nodeTree.begin() + static_cast<size_t>(smallerIndex));
+        nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(smallerIndex));
         const uint64_t secondSmallerIndexAfterRemoval = secondSmallerIndex < smallerIndex ? secondSmallerIndex : secondSmallerIndex - 1;
-        nodeTree.erase(nodeTree.begin() + static_cast<size_t>(secondSmallerIndexAfterRemoval));
+        nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(secondSmallerIndexAfterRemoval));
 
         Compressor::IHuffmanNode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
         nodeTree.push_back(combinedNode);
@@ -146,6 +148,10 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
             std::map<std::string, std::string> reversedCompressionTable;
             ReverseCompressionTable(compressionTable, reversedCompressionTable);
             compressionTable.clear();
+
+            std::cout << "\nTamanho inicial em bits: " << text.size() * 8 << '\n';
+            std::cout << "Tamanho final em bits: " << result.size() << '\n';
+            std::cout << "Taxa de compressao: " << static_cast<float>(result.size()) / static_cast<float>(text.size() * 8) << '\n';
             
             return {reversedCompressionTable, result.size(), textBytes};
         }
