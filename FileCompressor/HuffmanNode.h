@@ -6,8 +6,8 @@ namespace Compressor
     class IHuffmanNode
     {
     public:
-        virtual int GetCount() = 0;
         virtual ~IHuffmanNode() = default;
+        virtual int GetCount() = 0;
     };
 
     class LeafNode final : public IHuffmanNode

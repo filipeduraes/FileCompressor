@@ -7,7 +7,7 @@
 #include "Compressor.h"
 
 // Private Global functions
-std::vector<Compressor::IHuffmanNode*> GetInitialWordCounts(const std::vector<std::string>& words)
+std::vector<Compressor::IHuffmanNode*> CreateLeafNodesFromWordCounts(const std::vector<std::string>& words)
 {
     std::map<std::string, int> wordCounts;
     
@@ -32,7 +32,7 @@ std::vector<Compressor::IHuffmanNode*> GetInitialWordCounts(const std::vector<st
     return result;
 }
 
-std::tuple<uint64_t, uint64_t> GetTwoSmallerIndexes(const std::vector<Compressor::IHuffmanNode*>& nodes)
+std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector<Compressor::IHuffmanNode*>& nodes)
 {
     uint64_t smallestIndex = 0;
     uint64_t secondSmallestIndex = 0;
@@ -57,7 +57,7 @@ Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>&
 {
     while(nodeTree.size() > 1)
     {
-        std::tuple<uint64_t, uint64_t> twoSmallerIndexes = GetTwoSmallerIndexes(nodeTree);
+        std::tuple<uint64_t, uint64_t> twoSmallerIndexes = FindTwoSmallestIndexesFromNodes(nodeTree);
 
         const uint64_t smallerIndex = std::get<0>(twoSmallerIndexes);
         const uint64_t secondSmallerIndex = std::get<1>(twoSmallerIndexes);
@@ -172,7 +172,7 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
         if (!words.empty())
         {
-            std::vector<IHuffmanNode*> nodeTree = GetInitialWordCounts(words);
+            std::vector<IHuffmanNode*> nodeTree = CreateLeafNodesFromWordCounts(words);
             IHuffmanNode* root = CreateNodeTree(nodeTree);
 
             std::map<std::string, std::string> compressionTable;
@@ -183,6 +183,7 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
             std::map<std::string, std::string> reversedCompressionTable;
             ReverseCompressionTable(compressionTable, reversedCompressionTable);
             compressionTable.clear();
+            delete root;
 
             std::cout << "\nTamanho inicial em bits: " << text.size() * 8 << '\n';
             std::cout << "Tamanho final em bits: " << result.size() << '\n';
