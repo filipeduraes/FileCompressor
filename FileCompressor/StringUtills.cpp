@@ -1,4 +1,6 @@
-﻿#include "StringUtills.h"
+﻿#include <bitset>
+
+#include "StringUtills.h"
 
 std::vector<std::string> StringUtils::Split(const std::string& original, const char separator)
 {
@@ -20,4 +22,18 @@ std::vector<std::string> StringUtils::Split(const std::string& original, const c
     }
 
     return split;
+}
+
+std::string StringUtils::ConvertBytesToBitString(const std::vector<uint8_t>& bytes, const uint64_t bitSize)
+{
+    std::string bitString;
+
+    for (const uint8_t& byte : bytes)
+    {
+        std::bitset<8> bits(byte);
+        bitString += bits.to_string();
+    }
+
+    bitString = bitString.substr(0, bitSize);
+    return bitString;
 }

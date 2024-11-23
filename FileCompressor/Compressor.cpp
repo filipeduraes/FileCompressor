@@ -129,19 +129,6 @@ void ReverseCompressionTable(const std::unordered_map<std::string, std::string>&
     }
 }
 
-std::string ConvertCompressedBytesToBitString(const Compressor::CompressorOutput& data)
-{
-    std::string bitString;
-
-    for (const uint8_t& byte : data.compressedTextBytes)
-    {
-        std::bitset<8> bits(byte);
-        bitString += bits.to_string();
-    }
-    
-    return bitString;
-}
-
 std::string DecodeBitStringWithCompressionTable(Compressor::CompressorOutput& data, const std::string& bitString)
 {
     std::string currentBits;
@@ -197,11 +184,7 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
 std::string Compressor::DecompressData(CompressorOutput& data)
 {
-    std::string bitString = ConvertCompressedBytesToBitString(data);
-
-    // Remover os bits extras com base no tamanho
-    bitString = bitString.substr(0, data.initialBitSize);
-    
+    const std::string bitString = StringUtils::ConvertBytesToBitString(data.compressedTextBytes, data.initialBitSize);
     std::string decompressedText = DecodeBitStringWithCompressionTable(data, bitString);
     
     // Remover o último espaço em branco (se adicionado)
