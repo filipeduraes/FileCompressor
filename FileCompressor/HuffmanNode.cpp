@@ -1,29 +1,30 @@
 ﻿#include "HuffmanNode.h"
 
-Compressor::LeafNode::LeafNode(const int wordCount, std::string word)
-    : word(std::move(word)), wordCount(wordCount)
+Compressor::HuffmanNode::HuffmanNode(const int frequency)
+    : frequency(frequency)
 {
 }
 
-int Compressor::LeafNode::GetCount()
+int Compressor::HuffmanNode::GetFrequency() const
 {
-    return wordCount;
+    return frequency;
 }
 
 
-Compressor::CompositeNode::CompositeNode(IHuffmanNode* left, IHuffmanNode* right)
+Compressor::LeafNode::LeafNode(const int wordFrequency, std::string word)
+    : HuffmanNode(wordFrequency), word(std::move(word))
+{
+}
+
+
+Compressor::CompositeNode::CompositeNode(HuffmanNode* left, HuffmanNode* right)
     : leftNode(left), rightNode(right)
 {
-    count = leftNode->GetCount() + rightNode->GetCount();
+    frequency = leftNode->GetFrequency() + rightNode->GetFrequency();
 }
 
 Compressor::CompositeNode::~CompositeNode()
 {
     delete leftNode;
     delete rightNode;
-}
-
-int Compressor::CompositeNode::GetCount()
-{
-    return count;
 }

@@ -3,33 +3,34 @@
 
 namespace Compressor
 {
-    class IHuffmanNode
+    class HuffmanNode
     {
+    protected:
+        int frequency;
+
+        HuffmanNode() = default;
+        explicit HuffmanNode(int frequency);
+
     public:
-        virtual ~IHuffmanNode() = default;
-        virtual int GetCount() = 0;
+        virtual ~HuffmanNode() = default;
+        int GetFrequency() const;
     };
 
-    class LeafNode final : public IHuffmanNode
+    class LeafNode final : public HuffmanNode
     {
     public:
         std::string word;
-        int wordCount;
             
-        explicit LeafNode(int wordCount, std::string word);
-        int GetCount() override;
+        explicit LeafNode(int wordFrequency, std::string word);
     };
 
-    class CompositeNode final : public IHuffmanNode
+    class CompositeNode final : public HuffmanNode
     {
     public:
-        IHuffmanNode* leftNode;
-        IHuffmanNode* rightNode;
-        int count;
+        HuffmanNode* leftNode;
+        HuffmanNode* rightNode;
 
-        CompositeNode(IHuffmanNode* left, IHuffmanNode* right);
+        CompositeNode(HuffmanNode* left, HuffmanNode* right);
         ~CompositeNode() override;
-
-        int GetCount() override;
     };
 }

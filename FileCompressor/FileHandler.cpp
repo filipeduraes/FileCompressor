@@ -57,13 +57,13 @@ void FileHandler::ReadAllLinesFromFile(std::vector<std::string>& lines) const
 
     while (std::getline(stream, line))
     {
-        lines.push_back(line);
+        lines.push_back(std::move(line));
     }
 
     stream.close();
 }
 
-void FileHandler::InterpretCompressionTable(std::vector<std::string> lines, std::unordered_map<std::string, std::string>& compressionTable)
+void FileHandler::InterpretCompressionTable(std::vector<std::string>& lines, std::unordered_map<std::string, std::string>& compressionTable)
 {
     for (uint64_t i = 0; i < lines.size() - 2; i++)
     {
@@ -103,6 +103,6 @@ std::filesystem::path FileHandler::GetOutputPath(const bool isCompressed) const
     const std::string fileName = "Saida";
     const std::string fileExtension = isCompressed ? ".huf" : ".txt";
 
-    std::filesystem::path outputPath = directory / fileName / fileExtension;
+    std::filesystem::path outputPath = directory / (fileName + fileExtension);
     return outputPath;
 }

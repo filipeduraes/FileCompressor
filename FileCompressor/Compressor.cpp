@@ -6,44 +6,44 @@
 #include "Compressor.h"
 
 // Private Global functions
-std::vector<Compressor::IHuffmanNode*> CreateLeafNodesFromWordCounts(const std::vector<std::string>& words)
+std::vector<Compressor::HuffmanNode*> CreateLeafNodesFromFrequencies(const std::vector<std::string>& words)
 {
-    std::unordered_map<std::string, int> wordCounts;
+    std::unordered_map<std::string, int> frequencies;
     
     for(const std::string& word : words)
     {
-        if(wordCounts.count(word) == 0)
+        if(frequencies.count(word) == 0)
         {
-            wordCounts[word] = 0;
+            frequencies[word] = 0;
         }
 
-        wordCounts[word]++;
+        frequencies[word]++;
     }
 
-    std::vector<Compressor::IHuffmanNode*> result;
-    result.reserve(wordCounts.size());
+    std::vector<Compressor::HuffmanNode*> result;
+    result.reserve(frequencies.size());
     
-    for(const std::pair<const std::string, int>& wordCount : wordCounts)
+    for(const std::pair<const std::string, int>& frequency : frequencies)
     {
-        result.push_back(new Compressor::LeafNode(wordCount.second, wordCount.first));
+        result.emplace_back(new Compressor::LeafNode(frequency.second, frequency.first));
     }
     
     return result;
 }
 
-std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector<Compressor::IHuffmanNode*>& nodes)
+std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector<Compressor::HuffmanNode*>& nodes)
 {
     uint64_t smallestIndex = 0;
     uint64_t secondSmallestIndex = 0;
 
     for(uint64_t i = 1; i < nodes.size(); i++)
     {
-        if(nodes[i]->GetCount() < nodes[smallestIndex]->GetCount())
+        if(nodes[i]->GetFrequency() < nodes[smallestIndex]->GetFrequency())
         {
             secondSmallestIndex = smallestIndex;
             smallestIndex = i;
         }
-        else if(secondSmallestIndex == smallestIndex || nodes[i]->GetCount() < nodes[secondSmallestIndex]->GetCount())
+        else if(secondSmallestIndex == smallestIndex || nodes[i]->GetFrequency() < nodes[secondSmallestIndex]->GetFrequency())
         {
             secondSmallestIndex = i;
         }
@@ -52,7 +52,7 @@ std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector
     return {smallestIndex, secondSmallestIndex};
 }
 
-Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>& nodeTree)
+Compressor::HuffmanNode* CreateNodeTree(std::vector<Compressor::HuffmanNode*>& nodeTree)
 {
     while(nodeTree.size() > 1)
     {
@@ -61,21 +61,21 @@ Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>&
         const uint64_t smallerIndex = std::get<0>(twoSmallerIndexes);
         const uint64_t secondSmallerIndex = std::get<1>(twoSmallerIndexes);
 
-        Compressor::IHuffmanNode* smallerNode = nodeTree[smallerIndex];
-        Compressor::IHuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
+        Compressor::HuffmanNode* smallerNode = nodeTree[smallerIndex];
+        Compressor::HuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
         
         nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(smallerIndex));
         const uint64_t secondSmallerIndexAfterRemoval = secondSmallerIndex < smallerIndex ? secondSmallerIndex : secondSmallerIndex - 1;
         nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(secondSmallerIndexAfterRemoval));
 
-        Compressor::IHuffmanNode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
+        Compressor::HuffmanNode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
         nodeTree.push_back(combinedNode);
     }
 
     return nodeTree[0];
 }
 
-void BuildCompressionTableRecursive(Compressor::IHuffmanNode* currentNode, std::unordered_map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
+void BuildCompressionTableRecursive(Compressor::HuffmanNode* currentNode, std::unordered_map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
 {
     if(const Compressor::CompositeNode* currentComposite = dynamic_cast<Compressor::CompositeNode*>(currentNode))
     {
@@ -115,7 +115,7 @@ std::vector<uint8_t> ConvertEncodedTextToBytes(const std::string& encodedText)
         }
 
         uint8_t convertedText = static_cast<uint8_t>(strtol(byteSizeText.c_str(), nullptr, 2));
-        result.push_back(convertedText);
+        result.emplace_back(convertedText);
     }
 
     return result;
@@ -171,8 +171,8 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
         if (!words.empty())
         {
-            std::vector<IHuffmanNode*> nodeTree = CreateLeafNodesFromWordCounts(words);
-            IHuffmanNode* root = CreateNodeTree(nodeTree);
+            std::vector<HuffmanNode*> nodeTree = CreateLeafNodesFromFrequencies(words);
+            HuffmanNode* root = CreateNodeTree(nodeTree);
 
             std::unordered_map<std::string, std::string> compressionTable;
             BuildCompressionTableRecursive(root, compressionTable);

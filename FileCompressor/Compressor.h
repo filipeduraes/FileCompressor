@@ -15,10 +15,10 @@ namespace Compressor
 
         CompressorOutput() = default;
 
-        CompressorOutput(std::unordered_map<std::string, std::string> compressionTable, const uint64_t initialBitSize, std::vector<uint8_t> compressedTextBytes)
+        CompressorOutput(std::unordered_map<std::string, std::string> compressionTable, const uint64_t initialBitSize, const std::vector<uint8_t>& compressedTextBytes)
             : compressionTable(std::move(compressionTable)),
               initialBitSize(initialBitSize),
-              compressedTextBytes(std::move(compressedTextBytes))
+              compressedTextBytes(compressedTextBytes)
         {
         }
     };
