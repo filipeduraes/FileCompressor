@@ -1,5 +1,4 @@
-﻿#include <stack>
-#include <bitset>
+﻿#include <bitset>
 #include <iostream>
 
 #include "HuffmanNode.h"
@@ -9,7 +8,7 @@
 // Private Global functions
 std::vector<Compressor::IHuffmanNode*> CreateLeafNodesFromWordCounts(const std::vector<std::string>& words)
 {
-    std::map<std::string, int> wordCounts;
+    std::unordered_map<std::string, int> wordCounts;
     
     for(const std::string& word : words)
     {
@@ -76,7 +75,7 @@ Compressor::IHuffmanNode* CreateNodeTree(std::vector<Compressor::IHuffmanNode*>&
     return nodeTree[0];
 }
 
-void BuildCompressionTableRecursive(Compressor::IHuffmanNode* currentNode, std::map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
+void BuildCompressionTableRecursive(Compressor::IHuffmanNode* currentNode, std::unordered_map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
 {
     if(const Compressor::CompositeNode* currentComposite = dynamic_cast<Compressor::CompositeNode*>(currentNode))
     {
@@ -89,7 +88,7 @@ void BuildCompressionTableRecursive(Compressor::IHuffmanNode* currentNode, std::
     }
 }
 
-std::string EncodeText(const std::vector<std::string>& words, std::map<std::string, std::string>& compressionTable)
+std::string EncodeText(const std::vector<std::string>& words, std::unordered_map<std::string, std::string>& compressionTable)
 {
     std::string result;
     
@@ -122,7 +121,7 @@ std::vector<uint8_t> ConvertEncodedTextToBytes(const std::string& encodedText)
     return result;
 }
 
-void ReverseCompressionTable(const std::map<std::string, std::string>& compressionTable, std::map<std::string, std::string>& reversedCompressionTable)
+void ReverseCompressionTable(const std::unordered_map<std::string, std::string>& compressionTable, std::unordered_map<std::string, std::string>& reversedCompressionTable)
 {
     for(const std::pair<std::string, std::string> pair : compressionTable)
     {
@@ -175,12 +174,12 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
             std::vector<IHuffmanNode*> nodeTree = CreateLeafNodesFromWordCounts(words);
             IHuffmanNode* root = CreateNodeTree(nodeTree);
 
-            std::map<std::string, std::string> compressionTable;
+            std::unordered_map<std::string, std::string> compressionTable;
             BuildCompressionTableRecursive(root, compressionTable);
             const std::string result = EncodeText(words, compressionTable);
             const std::vector<uint8_t> textBytes = ConvertEncodedTextToBytes(result);
             
-            std::map<std::string, std::string> reversedCompressionTable;
+            std::unordered_map<std::string, std::string> reversedCompressionTable;
             ReverseCompressionTable(compressionTable, reversedCompressionTable);
             compressionTable.clear();
             delete root;

@@ -3,24 +3,24 @@
 
 #include "FileHandler.h"
 
-FileHandler::FileHandler(std::string filePath)
-    : path(std::move(filePath))
+FileHandler::FileHandler(const std::string& filePath)
+    : path(filePath)
 {
 }
 
 void FileHandler::SaveTextFile(const std::string& data)
 {
-    std::string outputPath = GetOutputPath(false);
+    std::filesystem::path outputPath = GetOutputPath(false);
 }
 
 void FileHandler::SaveBinaryFile(const Compressor::CompressorOutput& data)
 {
-    std::string outputPath = GetOutputPath(true);
+    std::filesystem::path outputPath = GetOutputPath(true);
 }
 
 std::string FileHandler::LoadTextFile() const
 {
-    std::ifstream stream (path);
+    std::ifstream stream(path);
     std::string line;
     std::string result;
 
@@ -39,7 +39,7 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile() const
     std::vector<std::string> lines;
     ReadAllLinesFromFile(lines);
 
-    std::map<std::string, std::string> compressionTable;
+    std::unordered_map<std::string, std::string> compressionTable;
     InterpretCompressionTable(lines, compressionTable);
 
     uint64_t initialBitSize = InterpretInitialBitSize(lines[lines.size() - 2]);
@@ -49,7 +49,6 @@ Compressor::CompressorOutput FileHandler::LoadBinaryFile() const
     
     return {compressionTable, initialBitSize, compressedBytes};
 }
-
 
 void FileHandler::ReadAllLinesFromFile(std::vector<std::string>& lines) const
 {
@@ -64,7 +63,7 @@ void FileHandler::ReadAllLinesFromFile(std::vector<std::string>& lines) const
     stream.close();
 }
 
-void FileHandler::InterpretCompressionTable(std::vector<std::string> lines, std::map<std::string, std::string>& compressionTable)
+void FileHandler::InterpretCompressionTable(std::vector<std::string> lines, std::unordered_map<std::string, std::string>& compressionTable)
 {
     for (uint64_t i = 0; i < lines.size() - 2; i++)
     {
@@ -98,11 +97,12 @@ void FileHandler::InterpretCompressedBytes(const std::string& compressedText, st
     }
 }
 
-std::string FileHandler::GetOutputPath(const bool isCompressed) const
+std::filesystem::path FileHandler::GetOutputPath(const bool isCompressed) const
 {
-    const uint64_t extensionDotIndex = path.find_last_of('.');
-    const std::string extensionlessPath = path.substr(0, extensionDotIndex);
-    const std::string finalPath = extensionlessPath + (isCompressed ? "_Compressed.huf" : "_Decompressed.txt");
-    
-    return finalPath;
+    const std::filesystem::path directory = path.parent_path();
+    const std::string fileName = "Saida";
+    const std::string fileExtension = isCompressed ? ".huf" : ".txt";
+
+    std::filesystem::path outputPath = directory / fileName / fileExtension;
+    return outputPath;
 }
