@@ -11,11 +11,30 @@ FileHandler::FileHandler(const std::string& filePath)
 void FileHandler::SaveTextFile(const std::string& data)
 {
     std::filesystem::path outputPath = GetOutputPath(false);
+    std::ofstream stream(outputPath);
+    stream << data;
+    stream.close();
 }
 
 void FileHandler::SaveBinaryFile(const Compressor::CompressorOutput& data)
 {
     std::filesystem::path outputPath = GetOutputPath(true);
+    std::ofstream stream(outputPath, std::ios::binary);
+
+    for(std::pair<std::string, std::string> pair : data.compressionTable )
+    {
+        stream << pair.first << ":" << pair.second << "\n";
+    }
+
+    stream.write(reinterpret_cast<const char*>(&data.initialBitSize), sizeof(data.initialBitSize));
+    stream << "\n";
+
+    for(uint8_t textByte : data.compressedTextBytes)
+    {
+        stream.write(reinterpret_cast<const char*>(&textByte), sizeof(textByte));
+    } 
+
+    stream.close();
 }
 
 std::string FileHandler::LoadTextFile() const
