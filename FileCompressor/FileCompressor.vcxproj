@@ -130,6 +130,8 @@
   <ItemGroup>
     <ClCompile Include="BinaryUtils.cpp" />
     <ClCompile Include="Compressor.cpp" />
+    <ClCompile Include="Decompressor.cpp" />
+    <ClCompile Include="GeneralUtils.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="HuffmanNode.cpp" />
@@ -141,6 +143,7 @@
     <ClInclude Include="BinaryUtils.h" />
     <ClInclude Include="Compressor.h" />
     <ClInclude Include="FileHandler.h" />
+    <ClInclude Include="GeneralUtils.h" />
     <ClInclude Include="HuffmanNode.h" />
     <ClInclude Include="LoadFileHandler.h" />
     <ClInclude Include="SaveFileHandler.h" />

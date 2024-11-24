@@ -5,151 +5,108 @@
 #include "StringUtills.h"
 #include "Compressor.h"
 
-// Private Global functions
-std::vector<Compressor::HuffmanNode*> CreateLeafNodesFromFrequencies(const std::vector<std::string>& words)
+#include "BinaryUtils.h"
+#include "GeneralUtils.h"
+
+// Private Implementation functions
+namespace Compressor
 {
-    std::unordered_map<std::string, int> frequencies;
-    
-    for(const std::string& word : words)
+    std::vector<HuffmanNode*> CreateLeafNodesFromFrequencies(const std::vector<std::string>& words)
     {
-        if(frequencies.count(word) == 0)
+        std::unordered_map<std::string, int> frequencies;
+    
+        for(const std::string& word : words)
         {
-            frequencies[word] = 0;
+            if(frequencies.count(word) == 0)
+            {
+                frequencies[word] = 0;
+            }
+
+            frequencies[word]++;
         }
 
-        frequencies[word]++;
-    }
-
-    std::vector<Compressor::HuffmanNode*> result;
-    result.reserve(frequencies.size());
+        std::vector<HuffmanNode*> result;
+        result.reserve(frequencies.size());
     
-    for(const std::pair<const std::string, int>& frequency : frequencies)
-    {
-        result.emplace_back(new Compressor::LeafNode(frequency.second, frequency.first));
-    }
+        for(const std::pair<const std::string, int>& frequency : frequencies)
+        {
+            result.emplace_back(new LeafNode(frequency.second, frequency.first));
+        }
     
-    return result;
-}
-
-std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector<Compressor::HuffmanNode*>& nodes)
-{
-    uint64_t smallestIndex = 0;
-    uint64_t secondSmallestIndex = 0;
-
-    for(uint64_t i = 1; i < nodes.size(); i++)
-    {
-        if(nodes[i]->GetFrequency() < nodes[smallestIndex]->GetFrequency())
-        {
-            secondSmallestIndex = smallestIndex;
-            smallestIndex = i;
-        }
-        else if(secondSmallestIndex == smallestIndex || nodes[i]->GetFrequency() < nodes[secondSmallestIndex]->GetFrequency())
-        {
-            secondSmallestIndex = i;
-        }
+        return result;
     }
 
-    return {smallestIndex, secondSmallestIndex};
-}
-
-Compressor::HuffmanNode* CreateNodeTree(std::vector<Compressor::HuffmanNode*>& nodeTree)
-{
-    while(nodeTree.size() > 1)
+    std::tuple<uint64_t, uint64_t> FindTwoSmallestIndexesFromNodes(const std::vector<HuffmanNode*>& nodes)
     {
-        std::tuple<uint64_t, uint64_t> twoSmallerIndexes = FindTwoSmallestIndexesFromNodes(nodeTree);
+        uint64_t smallestIndex = 0;
+        uint64_t secondSmallestIndex = 0;
 
-        const uint64_t smallerIndex = std::get<0>(twoSmallerIndexes);
-        const uint64_t secondSmallerIndex = std::get<1>(twoSmallerIndexes);
+        for(uint64_t i = 1; i < nodes.size(); i++)
+        {
+            if(nodes[i]->GetFrequency() < nodes[smallestIndex]->GetFrequency())
+            {
+                secondSmallestIndex = smallestIndex;
+                smallestIndex = i;
+            }
+            else if(secondSmallestIndex == smallestIndex || nodes[i]->GetFrequency() < nodes[secondSmallestIndex]->GetFrequency())
+            {
+                secondSmallestIndex = i;
+            }
+        }
 
-        Compressor::HuffmanNode* smallerNode = nodeTree[smallerIndex];
-        Compressor::HuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
+        return {smallestIndex, secondSmallestIndex};
+    }
+
+    HuffmanNode* CreateNodeTree(std::vector<HuffmanNode*>& nodeTree)
+    {
+        while(nodeTree.size() > 1)
+        {
+            std::tuple<uint64_t, uint64_t> twoSmallerIndexes = FindTwoSmallestIndexesFromNodes(nodeTree);
+
+            const uint64_t smallerIndex = std::get<0>(twoSmallerIndexes);
+            const uint64_t secondSmallerIndex = std::get<1>(twoSmallerIndexes);
+
+            HuffmanNode* smallerNode = nodeTree[smallerIndex];
+            HuffmanNode* secondSmallerNode = nodeTree[secondSmallerIndex];
         
-        nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(smallerIndex));
-        const uint64_t secondSmallerIndexAfterRemoval = secondSmallerIndex < smallerIndex ? secondSmallerIndex : secondSmallerIndex - 1;
-        nodeTree.erase(nodeTree.begin() + static_cast<uint64_t>(secondSmallerIndexAfterRemoval));
+            nodeTree.erase(nodeTree.begin() + (size_t) smallerIndex);
+            const uint64_t secondSmallerIndexAfterRemoval = secondSmallerIndex < smallerIndex ? secondSmallerIndex : secondSmallerIndex - 1;
+            nodeTree.erase(nodeTree.begin() + (size_t) secondSmallerIndexAfterRemoval);
 
-        Compressor::HuffmanNode* combinedNode = new Compressor::CompositeNode(smallerNode, secondSmallerNode);
-        nodeTree.push_back(combinedNode);
-    }
-
-    return nodeTree[0];
-}
-
-void BuildCompressionTableRecursive(Compressor::HuffmanNode* currentNode, std::unordered_map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
-{
-    if(const Compressor::CompositeNode* currentComposite = dynamic_cast<Compressor::CompositeNode*>(currentNode))
-    {
-        BuildCompressionTableRecursive(currentComposite->leftNode, binaryWords, currentCode + '0');
-        BuildCompressionTableRecursive(currentComposite->rightNode, binaryWords, currentCode + '1');
-    }
-    else if(const Compressor::LeafNode* currentLeaf = dynamic_cast<Compressor::LeafNode*>(currentNode))
-    {
-        binaryWords[currentLeaf->word] = currentCode;
-    }
-}
-
-std::string EncodeText(const std::vector<std::string>& words, std::unordered_map<std::string, std::string>& compressionTable)
-{
-    std::string result;
-    
-    for(const std::string& word : words)
-    {
-        result += compressionTable[word];
-    }
-    
-    return result;
-}
-
-std::vector<uint8_t> ConvertEncodedTextToBytes(const std::string& encodedText)
-{
-    std::vector<uint8_t> result;
-    
-    for(uint64_t i = 0; i < encodedText.size(); i += 8)
-    {
-        const uint64_t count = std::min(encodedText.size() - i, 8ull);
-        std::string byteSizeText = encodedText.substr(i, count);
-
-        if(byteSizeText.size() < 8)
-        {
-            byteSizeText.append(8 - count, '0');
+            HuffmanNode* combinedNode = new CompositeNode(smallerNode, secondSmallerNode);
+            nodeTree.push_back(combinedNode);
         }
 
-        uint8_t convertedText = static_cast<uint8_t>(strtol(byteSizeText.c_str(), nullptr, 2));
-        result.emplace_back(convertedText);
+        return nodeTree[0];
     }
 
-    return result;
-}
-
-void ReverseCompressionTable(const std::unordered_map<std::string, std::string>& compressionTable, std::unordered_map<std::string, std::string>& reversedCompressionTable)
-{
-    for(const std::pair<std::string, std::string> pair : compressionTable)
+    void BuildCompressionTableRecursive(HuffmanNode* currentNode, std::unordered_map<std::string, std::string>& binaryWords, const std::string& currentCode = "")
     {
-        reversedCompressionTable[pair.second] = pair.first;
-    }
-}
-
-std::string DecodeBitStringWithCompressionTable(Compressor::CompressorOutput& data, const std::string& bitString)
-{
-    std::string currentBits;
-    std::string decompressedText;
-    
-    for (const char& bit : bitString)
-    {
-        currentBits += bit;
-
-        if (data.compressionTable.find(currentBits) != data.compressionTable.end())
+        if(const CompositeNode* currentComposite = dynamic_cast<CompositeNode*>(currentNode))
         {
-            decompressedText += data.compressionTable.at(currentBits) + " ";
-            currentBits.clear();
+            BuildCompressionTableRecursive(currentComposite->leftNode, binaryWords, currentCode + '0');
+            BuildCompressionTableRecursive(currentComposite->rightNode, binaryWords, currentCode + '1');
+        }
+        else if(const LeafNode* currentLeaf = dynamic_cast<LeafNode*>(currentNode))
+        {
+            binaryWords[currentLeaf->word] = currentCode;
         }
     }
 
-    return decompressedText;
+    std::string EncodeText(const std::vector<std::string>& words, std::unordered_map<std::string, std::string>& compressionTable)
+    {
+        std::string result;
+    
+        for(const std::string& word : words)
+        {
+            result += compressionTable[word];
+        }
+    
+        return result;
+    }    
 }
 
-
-// Public API functions
+// Public API function
 Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 {
     if(!text.empty())
@@ -163,35 +120,20 @@ Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
 
             std::unordered_map<std::string, std::string> compressionTable;
             BuildCompressionTableRecursive(root, compressionTable);
+            delete root;
+            
             const std::string result = EncodeText(words, compressionTable);
-            const std::vector<uint8_t> textBytes = ConvertEncodedTextToBytes(result);
+            const std::vector<uint8_t> textBytes = BinaryUtils::ConvertEncodedTextToBytes(result);
             
             std::unordered_map<std::string, std::string> reversedCompressionTable;
-            ReverseCompressionTable(compressionTable, reversedCompressionTable);
+            GeneralUtils::ReverseUnorderedMap(compressionTable, reversedCompressionTable);
             compressionTable.clear();
-            delete root;
 
-            std::cout << "\nTamanho inicial em bits: " << text.size() * 8 << '\n';
-            std::cout << "Tamanho final em bits: " << result.size() << '\n';
-            std::cout << "Taxa de compressao: " << static_cast<float>(result.size()) / static_cast<float>(text.size() * 8) << '\n';
+            GeneralUtils::ShowCompressionResultsLog(text, result);
             
             return {reversedCompressionTable, result.size(), textBytes};
         }
     }
     
     return {};
-}
-
-std::string Compressor::DecompressData(CompressorOutput& data)
-{
-    const std::string bitString = StringUtils::ConvertBytesToBitString(data.compressedTextBytes, data.initialBitSize);
-    std::string decompressedText = DecodeBitStringWithCompressionTable(data, bitString);
-    
-    // Remover o último espaço em branco (se adicionado)
-    if (!decompressedText.empty() && decompressedText.back() == ' ')
-    {
-        decompressedText.pop_back();
-    }
-    
-    return decompressedText; 
 }

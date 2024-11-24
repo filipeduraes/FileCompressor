@@ -43,11 +43,11 @@ Compressor::CompressorOutput LoadFileHandler::LoadBinaryFile()
 
 void LoadFileHandler::InterpretCompressionTable(std::unordered_map<std::string, std::string>& compressionTable)
 {
-    uint8_t maxCodeSizeAsBytes;
+    uint8_t maxCodeSizeAsBytes = 0;
     stream.read(reinterpret_cast<char*>(&maxCodeSizeAsBytes), sizeof(maxCodeSizeAsBytes));
     IgnoreSeparator();
     
-    uint64_t tableSize;
+    uint64_t tableSize = 0;
     stream.read(reinterpret_cast<char*>(&tableSize), sizeof(tableSize));
     IgnoreSeparator();
 
