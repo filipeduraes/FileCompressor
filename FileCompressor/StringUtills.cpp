@@ -37,3 +37,14 @@ std::string StringUtils::ConvertBytesToBitString(const std::vector<uint8_t>& byt
     bitString = bitString.substr(0, bitSize);
     return bitString;
 }
+
+void StringUtils::ReplaceAll(std::string& original, const std::string&& replaceWord, const std::string&& replaceBy)
+{
+    uint64_t index = original.find(replaceWord);
+
+    while (index != std::string::npos)
+    {
+        original.replace(index, replaceWord.size(), replaceBy);
+        index = original.find(replaceWord, index + replaceBy.size());
+    }
+}
