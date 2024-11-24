@@ -20,7 +20,7 @@ int GetUserInput(std::string& filePath)
     return choice;
 }
 
-int CompressFile(FileHandler fileHandler)
+int CompressFile(const FileHandler& fileHandler)
 {
     const std::string loadedData = fileHandler.LoadTextFile();
     const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
@@ -35,7 +35,7 @@ int CompressFile(FileHandler fileHandler)
     return EXIT_SUCCESS;
 }
 
-int DecompressFile(FileHandler fileHandler)
+int DecompressFile(const FileHandler& fileHandler)
 {
     Compressor::CompressorOutput loadedData = fileHandler.LoadBinaryFile();
     const std::string decompressedData = DecompressData(loadedData);
