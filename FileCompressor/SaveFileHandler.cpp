@@ -1,5 +1,7 @@
 ﻿#include "SaveFileHandler.h"
 
+#include <iostream>
+
 #include "BinaryUtils.h"
 #include "StringUtills.h"
 
@@ -12,20 +14,36 @@ void SaveFileHandler::SaveTextFile(const std::string& data)
 {
     const std::filesystem::path outputPath = GetOutputPath(false);
     stream = std::ofstream(outputPath);
+
+    if(!stream.is_open())
+    {
+        std::cout << "Arquivo nao pode ser aberto.\n";
+        return;
+    }
+    
     stream << data;
     stream.close();
+
+    std::cout << "\nArquivo salvo em: " << outputPath.string() << "\n";
 }
 
 void SaveFileHandler::SaveBinaryFile(const Compressor::CompressorOutput& data)
 {
     const std::filesystem::path outputPath = GetOutputPath(true);
     stream = std::ofstream(outputPath, std::ios::binary);
+
+    if(!stream.is_open())
+    {
+        std::cout << "Arquivo nao pode ser aberto.\n";
+        return;
+    }
     
     WriteCompressionTable(data.compressionTable);
     WriteInitialBitSize(data.initialBitSize);
     WriteCompressedTextBytes(data.compressedTextBytes);
 
     stream.close();
+    std::cout << "Arquivo salvo em: " << outputPath.string() << "\n";
 }
 
 void SaveFileHandler::WriteCompressionTable(const std::unordered_map<std::string, std::string>& compressionTable)

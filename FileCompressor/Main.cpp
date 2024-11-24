@@ -7,7 +7,7 @@
 
 int GetUserInput(std::string& filePath)
 {
-    std::cout << "Deseja comprimir (0) ou descomprimir (1) o arquivo? ";
+    std::cout << "O que deseja fazer?\n [0] comprimir\n [1] descomprimir\n";
     int choice = -1;
 
     while(choice != 0 && choice != 1)
@@ -15,13 +15,14 @@ int GetUserInput(std::string& filePath)
         std::cin >> choice;
     }
 
-    std::cout << "Insira o caminho do arquivo: \n";
+    std::cout << "\nInsira o caminho do arquivo: ";
     std::getline(std::cin >> std::ws, filePath);
     return choice;
 }
 
 int CompressFile(const FileHandler& fileHandler)
 {
+    std::cout << "\nIniciando a compressao do arquivo\n";
     const std::string loadedData = fileHandler.LoadTextFile();
     const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
 
@@ -37,6 +38,7 @@ int CompressFile(const FileHandler& fileHandler)
 
 int DecompressFile(const FileHandler& fileHandler)
 {
+    std::cout << "\nIniciando a descompressao do arquivo\n";
     Compressor::CompressorOutput loadedData = fileHandler.LoadBinaryFile();
     const std::string decompressedData = DecompressData(loadedData);
 
