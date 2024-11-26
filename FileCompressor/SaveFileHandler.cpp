@@ -101,8 +101,18 @@ uint8_t SaveFileHandler::GetMaxBitSizeFromCompressionTableCodes(const std::unord
 std::filesystem::path SaveFileHandler::GetOutputPath(const bool isCompressed) const
 {
     const std::filesystem::path directory = path.parent_path();
-    const std::string fileName = isCompressed ? "saida.huf" : "entrada.txt";
+    const std::string fileExtension = isCompressed ? ".huf" : ".txt";
+    const std::string fileName = isCompressed ? "saida" : "entrada";
 
-    std::filesystem::path outputPath = directory / fileName;
+    std::filesystem::path outputPath = directory / (fileName + fileExtension);
+    int counter = 1;
+    
+    while (exists(outputPath))
+    {
+        std::string numberedFileName = fileName + " (" + std::to_string(counter) + ')' + fileExtension;
+        outputPath = directory / numberedFileName;
+        counter++;
+    }
+    
     return outputPath;
 }
