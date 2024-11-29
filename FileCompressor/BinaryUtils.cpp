@@ -9,7 +9,7 @@ uint8_t BinaryUtils::ConvertBitSizeToByteSize(const uint8_t bitSize)
 
 uint8_t BinaryUtils::GetByteFromTextAtIndex(const std::string& text, const uint64_t index)
 {
-    const uint64_t count = std::min(text.size() - index, 8ull);
+    const uint64_t count = std::min(static_cast<uint64_t>(text.size() - index), static_cast<uint64_t>(8ull));
     std::string byteSizeText = text.substr(index, count);
 
     if(byteSizeText.size() < 8)

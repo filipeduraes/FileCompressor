@@ -43,13 +43,13 @@ int CompressFile(const FileHandler& fileHandler)
     if(compressionByWordSize < compressionByLetterSize)
     {
         std::cout << "\nCompressao por palavras escolhida.\n";
-        std::cout << "\nTamanho Aproximado = " << compressionByWordSize << " / " << compressionByLetterSize << '\n';
+        std::cout << "\nTamanho Aproximado = " << compressionByWordSize << " vs " << compressionByLetterSize << '\n';
         fileHandler.SaveBinaryFile(compressionByWord);
     }
     else
     {
         std::cout << "\nCompressao por letras escolhida.\n";
-        std::cout << "\nTamanho Aproximado = " << compressionByLetterSize << " / " << compressionByWordSize << '\n';
+        std::cout << "\nTamanho Aproximado = " << compressionByLetterSize << " vs " << compressionByWordSize << '\n';
         fileHandler.SaveBinaryFile(compressionByLetter);
     }
     

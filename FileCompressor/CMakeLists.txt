@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Define o nome do projeto
-project(SearchMethodsComparison)
+project(FileCompressor)
 
 # Define a versão do padrão C++
 set(CMAKE_CXX_STANDARD 17)
@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB SRC_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 # Adiciona o executável usando todos os arquivos encontrados
-add_executable(SearchMethodsComparison ${SRC_FILES})
+add_executable(FileCompressor ${SRC_FILES})
 
 # Inclui o diretório atual para que os cabeçalhos sejam encontrados
-target_include_directories(SearchMethodsComparison PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(FileCompressor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
