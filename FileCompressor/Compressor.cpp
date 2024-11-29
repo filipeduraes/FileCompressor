@@ -89,7 +89,7 @@ namespace Compressor
         }
         else if(const LeafNode* currentLeaf = dynamic_cast<LeafNode*>(currentNode))
         {
-            binaryWords[currentLeaf->word] = currentCode;
+            binaryWords[currentLeaf->word] = !currentCode.empty() ? currentCode : "0";
         }
     }
 
@@ -107,11 +107,11 @@ namespace Compressor
 }
 
 // Public API function
-Compressor::CompressorOutput Compressor::CompressData(const std::string& text)
+Compressor::CompressorOutput Compressor::CompressData(const std::string& text, char separator)
 {
     if(!text.empty())
     {
-        const std::vector<std::string> words = StringUtils::Split(text);
+        const std::vector<std::string> words = StringUtils::Split(text, separator);
 
         if (!words.empty())
         {

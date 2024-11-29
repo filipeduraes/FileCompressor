@@ -24,15 +24,35 @@ int CompressFile(const FileHandler& fileHandler)
 {
     std::cout << "\nIniciando a compressao do arquivo\n";
     const std::string loadedData = fileHandler.LoadTextFile();
-    const Compressor::CompressorOutput compressorOutput = Compressor::CompressData(loadedData);
 
-    if(compressorOutput.initialBitSize == 0)
+    std::cout << "\n - Compressao por palavras";
+    const Compressor::CompressorOutput compressionByWord = Compressor::CompressData(loadedData);
+
+    std::cout << "\n\n - Compressao por letras";
+    const Compressor::CompressorOutput compressionByLetter = Compressor::CompressData(loadedData, '\0');
+
+    if(compressionByWord.initialBitSize == 0 && compressionByLetter.initialBitSize == 0)
     {
         std::cerr << "Falha na compressao.";
         return EXIT_FAILURE;
     }
-                
-    fileHandler.SaveBinaryFile(compressorOutput);
+
+    const uint64_t compressionByWordSize = compressionByWord.GetTotalSize();
+    const uint64_t compressionByLetterSize = compressionByLetter.GetTotalSize();
+    
+    if(compressionByWordSize < compressionByLetterSize)
+    {
+        std::cout << "\nCompressao por palavras escolhida.\n";
+        std::cout << "\nTamanho Aproximado = " << compressionByWordSize << " / " << compressionByLetterSize << '\n';
+        fileHandler.SaveBinaryFile(compressionByWord);
+    }
+    else
+    {
+        std::cout << "\nCompressao por letras escolhida.\n";
+        std::cout << "\nTamanho Aproximado = " << compressionByLetterSize << " / " << compressionByWordSize << '\n';
+        fileHandler.SaveBinaryFile(compressionByLetter);
+    }
+    
     return EXIT_SUCCESS;
 }
 
@@ -47,7 +67,7 @@ int DecompressFile(const FileHandler& fileHandler)
         std::cerr << "Falha na descompressao.";
         return EXIT_FAILURE;
     }
-                
+    
     fileHandler.SaveTextFile(decompressedData);
     return EXIT_SUCCESS;
 }

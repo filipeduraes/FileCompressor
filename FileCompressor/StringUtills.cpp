@@ -7,6 +7,18 @@ std::vector<std::string> StringUtils::Split(const std::string& original, const c
     std::vector<std::string> split;
     unsigned long long lastSeparatorOccurrence = 0;
 
+    if(separator == '\0')
+    {
+        split.reserve(original.size());
+        
+        for(char letter : original)
+        {
+            split.emplace_back(1, letter);
+        }
+        
+        return split;
+    }
+
     while(lastSeparatorOccurrence < original.size())
     {
         unsigned long long separatorIndex = original.find(separator, lastSeparatorOccurrence);

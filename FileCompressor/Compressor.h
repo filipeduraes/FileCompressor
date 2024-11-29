@@ -21,8 +21,20 @@ namespace Compressor
               compressedTextBytes(compressedTextBytes)
         {
         }
+
+        uint64_t GetTotalSize() const
+        {
+            uint64_t totalTableSize = 0;
+
+            for(std::pair<std::string, std::string> pair : compressionTable)
+            {
+                totalTableSize += pair.first.size() + pair.second.size() * 8;
+            }
+            
+            return totalTableSize + initialBitSize;
+        }
     };
 
-    CompressorOutput CompressData(const std::string& text);
+    CompressorOutput CompressData(const std::string& text, char separator = ' ');
     std::string DecompressData(CompressorOutput& data);
 }
