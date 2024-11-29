@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+//Implementa funções de utilidades para manipulação de valores binários
 namespace BinaryUtils
 {
     uint8_t ConvertBitSizeToByteSize(uint8_t bitSize);

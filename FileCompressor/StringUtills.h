@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdint>
 
+//Implementa funções de utilidades para manipulação de strings
 namespace StringUtils
 {
     std::vector<std::string> Split(const std::string& original, char separator = ' ');

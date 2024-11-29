@@ -5,6 +5,7 @@
 
 #include "Compressor.h"
 
+//Cuida do salvamento e carregamento de arquivos
 class FileHandler
 {
 private:

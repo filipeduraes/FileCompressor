@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 
+//Implementa funções de utilidades de uso geral
 namespace GeneralUtils
 {
     uint64_t GreatestCommonDenominator(uint64_t first, uint64_t second);

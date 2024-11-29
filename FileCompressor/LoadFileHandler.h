@@ -7,6 +7,7 @@
 #include <vector>
 #include "Compressor.h"
 
+//Cuida do carregamento de arquivos
 class LoadFileHandler
 {
 private:

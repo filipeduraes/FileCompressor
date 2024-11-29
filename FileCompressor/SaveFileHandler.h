@@ -6,6 +6,7 @@
 
 #include "Compressor.h"
 
+//Cuida do salvamento de arquivos
 class SaveFileHandler
 {
 private:

@@ -20,6 +20,25 @@ int GetUserInput(std::string& filePath)
     return choice;
 }
 
+void CompareAndChooseCompressionMethods(const FileHandler& fileHandler, const Compressor::CompressorOutput& compressionByWord, const Compressor::CompressorOutput& compressionByLetter)
+{
+    const uint64_t compressionByWordSize = compressionByWord.GetTotalSize();
+    const uint64_t compressionByLetterSize = compressionByLetter.GetTotalSize();
+    
+    if(compressionByWordSize < compressionByLetterSize)
+    {
+        std::cout << "\nCompressao por palavras escolhida.\n";
+        std::cout << "\nTamanho Aproximado = " << compressionByWordSize << " vs " << compressionByLetterSize << '\n';
+        fileHandler.SaveBinaryFile(compressionByWord);
+    }
+    else
+    {
+        std::cout << "\nCompressao por letras escolhida.\n";
+        std::cout << "\nTamanho Aproximado = " << compressionByLetterSize << " vs " << compressionByWordSize << '\n';
+        fileHandler.SaveBinaryFile(compressionByLetter);
+    }
+}
+
 int CompressFile(const FileHandler& fileHandler)
 {
     std::cout << "\nIniciando a compressao do arquivo\n";
@@ -37,21 +56,7 @@ int CompressFile(const FileHandler& fileHandler)
         return EXIT_FAILURE;
     }
 
-    const uint64_t compressionByWordSize = compressionByWord.GetTotalSize();
-    const uint64_t compressionByLetterSize = compressionByLetter.GetTotalSize();
-    
-    if(compressionByWordSize < compressionByLetterSize)
-    {
-        std::cout << "\nCompressao por palavras escolhida.\n";
-        std::cout << "\nTamanho Aproximado = " << compressionByWordSize << " vs " << compressionByLetterSize << '\n';
-        fileHandler.SaveBinaryFile(compressionByWord);
-    }
-    else
-    {
-        std::cout << "\nCompressao por letras escolhida.\n";
-        std::cout << "\nTamanho Aproximado = " << compressionByLetterSize << " vs " << compressionByWordSize << '\n';
-        fileHandler.SaveBinaryFile(compressionByLetter);
-    }
+    CompareAndChooseCompressionMethods(fileHandler, compressionByWord, compressionByLetter);
     
     return EXIT_SUCCESS;
 }
