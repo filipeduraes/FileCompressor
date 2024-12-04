@@ -52,11 +52,9 @@ void SaveFileHandler::WriteCompressionTable(const std::unordered_map<std::string
     const uint8_t maxCodeSizeAsBytes = BinaryUtils::ConvertBitSizeToByteSize(maxBitSize);
     
     stream.write(reinterpret_cast<const char*>(&maxCodeSizeAsBytes), sizeof(maxCodeSizeAsBytes));
-    stream << '\n';
 
     const uint64_t tableSize = compressionTable.size();
     stream.write(reinterpret_cast<const char*>(&tableSize), sizeof(tableSize));
-    stream << '\n';
     
     for(std::pair<std::string, std::string> pair : compressionTable)
     {
@@ -73,7 +71,6 @@ void SaveFileHandler::WriteCompressionTable(const std::unordered_map<std::string
 void SaveFileHandler::WriteInitialBitSize(const uint64_t initialBitSize)
 {
     stream.write(reinterpret_cast<const char*>(&initialBitSize), sizeof(initialBitSize));
-    stream << "\n";
 }
 
 void SaveFileHandler::WriteCompressedTextBytes(const std::vector<uint8_t>& compressedTextBytes)

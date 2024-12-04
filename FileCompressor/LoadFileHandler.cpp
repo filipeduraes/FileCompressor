@@ -45,11 +45,9 @@ void LoadFileHandler::InterpretCompressionTable(std::unordered_map<std::string, 
 {
     uint8_t maxCodeSizeAsBytes = 0;
     stream.read(reinterpret_cast<char*>(&maxCodeSizeAsBytes), sizeof(maxCodeSizeAsBytes));
-    IgnoreSeparator();
     
     uint64_t tableSize = 0;
     stream.read(reinterpret_cast<char*>(&tableSize), sizeof(tableSize));
-    IgnoreSeparator();
 
     for (uint64_t i = 0; i < tableSize; i++)
     {
@@ -78,17 +76,10 @@ uint64_t LoadFileHandler::InterpretInitialBitSize()
 
 void LoadFileHandler::InterpretCompressedBytes(std::vector<uint8_t>& compressedBytes)
 {
-    IgnoreSeparator();
     uint8_t byte = 0;
 
     while(stream.read(reinterpret_cast<char*>(&byte), sizeof(byte)))
     {
         compressedBytes.push_back(byte);
     }
-}
-
-void LoadFileHandler::IgnoreSeparator()
-{
-    char separator;
-    stream.read(&separator, sizeof(char));
 }
