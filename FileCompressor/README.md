@@ -1,6 +1,7 @@
 # Trabalho 02
 
 Instruções para compilar e executar o projeto.
+
 **Nota:** Estamos usando features da versão 17 do C++, então tenha certeza de que está com essa versão ou uma superior instalada.
 
 ---
