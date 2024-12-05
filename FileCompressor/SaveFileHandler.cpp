@@ -58,6 +58,7 @@ void SaveFileHandler::WriteCompressionTable(const std::unordered_map<std::string
     
     for(std::pair<std::string, std::string> pair : compressionTable)
     {
+        StringUtils::ReplaceAll(pair.second, "\\", "\\\\");
         StringUtils::ReplaceAll(pair.second, "\n", "\\n");
         uint64_t codeAsBinary = strtol(pair.first.c_str(), nullptr, 2);
         uint8_t codeSizeInBits = static_cast<uint8_t>(pair.first.size());

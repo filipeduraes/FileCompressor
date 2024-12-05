@@ -61,7 +61,12 @@ void LoadFileHandler::InterpretCompressionTable(std::unordered_map<std::string, 
         
         std::string key = std::bitset<64>(code).to_string();
         key = key.substr(key.size() - codeSizeInBits, codeSizeInBits);
+        
+        StringUtils::ReplaceAll(value, "\\\\n", "FAKE_LINE_BREAK");
+        StringUtils::ReplaceAll(value, "\\\\", "SINGLE_BACKSLASH");
         StringUtils::ReplaceAll(value, "\\n", "\n");
+        StringUtils::ReplaceAll(value, "FAKE_LINE_BREAK", "\\n");
+        StringUtils::ReplaceAll(value, "SINGLE_BACKSLASH", "\\");
         
         compressionTable[key] = value;
     }
